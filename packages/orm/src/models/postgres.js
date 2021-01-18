@@ -6,11 +6,11 @@ class ModelPG {
     this.db         = db
     this.tablename  = tablename
     this.definition = definition
-    this.options    = {}
+    this.config     = {}
 
-    this.options.customHooks= options?.customHooks || {}
-    this.options.useDates= options?.useDates === true
-    this.options.checkBeforeDelete= options?.checkBeforeDelete
+    this.config.customHooks= options?.customHooks || {}
+    this.config.useDates= options?.useDates === true
+    this.config.checkBeforeDelete= options?.checkBeforeDelete
   }
 
   
@@ -45,7 +45,9 @@ class ModelPG {
 
   prepareQuery(filter, options) {
 
-    const sselect = options.fields != undefined ? options.fields.join(',') : '*'
+    const sselect = options?.fields != undefined 
+                    ? options.fields.join(',') 
+                    : '*'
 
     const [wfields, wvalues] = this._objToTuple(filter)
     
@@ -65,7 +67,7 @@ class ModelPG {
     
     let query = `SELECT ${sselect} FROM ${this.tablename} ${swhere}`
 
-    if (options.sortby) {
+    if (options?.sortby) {
       let name= '', dir= 1
       if (typeof options.sortby == 'object') {
         name= options.sortby[0]
@@ -76,8 +78,12 @@ class ModelPG {
       query+= ` SORT BY ${name} ${!dir ? 'DESC' : 'ASC'}`
     }
 
-    if (options.limit && options.offset) {
-      query += ` LIMIT ${options.limit} OFFSET ${options.offset}`
+    if (! isNaN(options?.limit)) {
+      query += ` LIMIT ${options.limit} `
+    }
+    
+    if (! isNaN(options?.offset)) {
+      query += ` OFFSET ${options.offset}`
     }
 
     return [query, wvalues]
@@ -116,7 +122,7 @@ class ModelPG {
 
   async keyList(filt, options) {    
     
-    let data = await this.read(filt, {fields: ['id', 'name'], transaction: options ? options.transaction : undefined})
+    let data = await this.read(filt, {fields: ['id', 'name'], transaction: options?.transaction})
     this.ensureDefs(data)
 
     let res= {}
@@ -125,19 +131,19 @@ class ModelPG {
   }
 
   async distinct(field, filt, options) {    
-    const data = await this.read(filt, {fields: [`DISTINCT ${field}`], transaction: options ? options.transaction : undefined})
+    const data = await this.read(filt, {fields: [`DISTINCT ${field}`], transaction: options?.transaction})
     const res= data.map((d) => d[field])
     return res
   }
 
   async count(filt, options) {    
     let field
-    if (options!=undefined && options.distinct!=undefined) {
+    if (options?.distinct!=undefined) {
       field= `COUNT(DISTINCT ${options.distinct}) AS cnt`
     } else {
       field= 'COUNT(1) AS cnt'
     }
-    const data = await this.read(filt, {fields: [field], transaction: options ? options.transaction : undefined})
+    const data = await this.read(filt, {fields: [field], transaction: options?.transaction})
     try {
       return data[0].cnt
     } catch(error) {
@@ -183,15 +189,15 @@ class ModelPG {
   }
 
   async beforeInsert(params, options) {
-    if (this.options.useDates) {
+    if (this.config.useDates) {
       const now= epoch()
       params.created_at= now
     }
 
 
     let allow= true
-    if (this.options.customHooks.beforeInsert != undefined) {
-      [params, options, allow]= await this.options.customHooks.beforeInsert(params, options)
+    if (this.config.customHooks.beforeInsert != undefined) {
+      [params, options, allow]= await this.config.customHooks.beforeInsert(params, options)
     }
 
     return Promise.resolve([
@@ -200,8 +206,8 @@ class ModelPG {
   }
 
   async afterInsert(id, params, options) {
-    if (this.options.customHooks.afterInsert != undefined) {
-      id= await this.options.customHooks.afterInsert(id, params, options)
+    if (this.config.customHooks.afterInsert != undefined) {
+      id= await this.config.customHooks.afterInsert(id, params, options)
     }
 
     return Promise.resolve(
@@ -246,14 +252,14 @@ class ModelPG {
 
 
   async beforeUpdate(params, filter, options) {
-    if (this.options.useDates) {
+    if (this.config.useDates) {
       const now= epoch()
       params.last_update_at= now
     }
 
     let allow= true
-    if (this.options.customHooks.beforeUpdate != undefined) {
-      [params, filter, options, allow]= await this.options.customHooks.beforeUpdate(params, filter, options)
+    if (this.config.customHooks.beforeUpdate != undefined) {
+      [params, filter, options, allow]= await this.config.customHooks.beforeUpdate(params, filter, options)
     }
 
     return Promise.resolve([
@@ -263,8 +269,8 @@ class ModelPG {
   }
 
   async afterUpdate(rows, params, filter, options) {
-    if (this.options.customHooks.afterUpdate != undefined) {
-      rows= await this.options.ustomHooks.afterUpdate(rows, params, filter, options)
+    if (this.config.customHooks.afterUpdate != undefined) {
+      rows= await this.config.ustomHooks.afterUpdate(rows, params, filter, options)
     }    
 
     return Promise.resolve(
@@ -326,12 +332,12 @@ class ModelPG {
   async beforeDelete(filter, options) {
     let allow= true
 
-    if (this.options.checkBeforeDelete!=undefined) {
+    if (this.config.checkBeforeDelete!=undefined) {
       try {
         if (filter.id != undefined) {
           let found= 0
 
-          for (const check of this.options.checkBeforeDelete) {
+          for (const check of this.config.checkBeforeDelete) {
             const [checkTable, checkField]= check.split('.')
             const qry= `SELECT COUNT(1) as cnt FROM ${checkTable} WHERE ${checkField} = $1`
             const filt= [filter.id]
@@ -344,8 +350,8 @@ class ModelPG {
       } catch(e) {}
     }
 
-    if (this.options.customHooks.beforeDelete != undefined) {
-      [filter, options, allow] = await this.options.customHooks.beforeDelete(filter, options)
+    if (this.config.customHooks.beforeDelete != undefined) {
+      [filter, options, allow] = await this.config.customHooks.beforeDelete(filter, options)
     }
 
     return Promise.resolve([
@@ -354,8 +360,8 @@ class ModelPG {
   }
 
   async afterDelete(rows, filter, options) {
-    if (this.options.customHooks.afterDelete != undefined) {
-      rows = await this.options.customHooks.afterDelete(rows, filter, options)
+    if (this.config.customHooks.afterDelete != undefined) {
+      rows = await this.config.customHooks.afterDelete(rows, filter, options)
     }
 
 
