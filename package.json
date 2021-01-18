@@ -1,0 +1,19 @@
+{
+  "name": "dibi",
+  "private": true,
+  "description": "Database to Web",
+  "author": "Donato Lorenzo <donato@afialapis.com>",
+  "contributors": [
+    "Donato Lorenzo <donato@afialapis.com>"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "lint": "eslint packages",
+    "clean": "rm -fr pnpm-lock.yaml node_modules packages/conn/node_modules packages/orm/node_modules packages/router/node_modules",
+    "reset": "pnpm run clean && pnpm i"
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.6.0"
+  }
+}

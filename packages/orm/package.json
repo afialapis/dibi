@@ -1,0 +1,63 @@
+{
+  "name": "dibiorm",
+  "version": "0.0.1",
+  "description": "A small ORM for those out there who still feel good typing some raw SQL",
+  "author": "Donato Lorenzo <donato@afialapis.com>",
+  "contributors": [
+    "Donato Lorenzo <donato@afialapis.com>"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/afialapis/dibi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/afialapis/dibi/issues"
+  },
+  "homepage": "https://dibi.afialapis.com/",
+  "files": [
+    "lib",
+    "dist"
+  ],
+  "main": "lib/index.js",
+  "cjs": "dist/dibiorm.cjs.js",
+  "module": "dist/dibiorm.es.js",
+  "scripts": {
+    "clean-test": "rm -f test/bundle.js",
+    "clean-lib": "rm -rf lib && mkdir lib",
+    "clean-dist": "rm -rf dist && mkdir dist",
+    "lint": "eslint src",
+    "test-build": "npm run clean-test && rollup -c rollup.test.js",
+    "test": "npm run test-build && ./node_modules/mocha/bin/mocha test/bundle.js",
+    "lib": "npm run clean-lib && babel src -d lib",
+    "dist": "npm run clean-dist && rollup -c",
+    "prepare": "npm run lint && npm run test && npm run clean-test && npm run lib && npm run dist"
+  },
+  "keywords": [
+    "js",
+    "orm",
+    "sql"
+  ],
+  "devDependencies": {
+    "afi-util": "^0.0.9",
+    "@babel/cli": "^7.10.5",
+    "@babel/core": "^7.11.1",
+    "@babel/preset-env": "^7.11.0",
+    "@rollup/plugin-babel": "^5.1.0",
+    "@rollup/plugin-commonjs": "^14.0.0",
+    "@rollup/plugin-node-resolve": "^8.4.0",
+    "@rollup/plugin-replace": "^2.3.3",
+    "co": "^4.6.0",
+    "es6-promise": "^4.2.8",
+    "mocha": "^8.1.1",
+    "rollup": "^2.23.1",
+    "rollup-plugin-node-externals": "^2.2.0",
+    "rollup-plugin-node-polyfills": "^0.2.1",
+    "rollup-plugin-terser": "^6.1.0",
+    "dibiconn": "workspace:../conn"
+  },
+  "peerDependencies": {
+    "afi-util": "^0.0.9",
+    "dibiconn": "workspace:../conn"
+  }
+}

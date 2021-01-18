@@ -1,0 +1,24 @@
+# Thumbnails
+._*
+
+### IDE ###
+*.sublime-workspace
+*.sublime-project
+.vscode
+
+# App specific
+coverage
+node_modules
+bower_components
+.tmp
+npm-debug.log*
+
+# others
+**/dist
+**/lib
+**/issues
+**/codepen
+**/.npmignore
+**/TODO.lst
+**/.old
+**/test/bundle.js
