@@ -5,7 +5,7 @@ class DibiConnPG extends DibiConnBase {
 
   constructor (config, options) {
     super(config, options)
-    this.db       = getDb(config)
+    this.db = getDb(config)
   }
 
   get dialect() {

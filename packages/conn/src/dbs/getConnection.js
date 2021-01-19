@@ -1,9 +1,9 @@
 import DibiConnPG from './postgres/connection'
 
-function getConnection (config) {
+function getConnection (config, options) {
 
   if (config.dialect == 'postgres') {
-    const conn= new DibiConnPG(config)
+    const conn= new DibiConnPG(config, options)
     return conn
   }
 
